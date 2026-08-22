@@ -1,0 +1,206 @@
+{
+  "name": "peter-sync",
+  "displayName": "peter-sync",
+  "description": "Bidirectional folder sync from VS Code using the peter-sync CLI",
+  "version": "0.0.1",
+  "publisher": "peter",
+  "engines": {
+    "vscode": "^1.134.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "peter-sync.refresh",
+        "title": "Refresh",
+        "category": "peter-sync",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "peter-sync.addPair",
+        "title": "Add Pair",
+        "category": "peter-sync",
+        "icon": "$(add)"
+      },
+      {
+        "command": "peter-sync.removePair",
+        "title": "Remove Pair",
+        "category": "peter-sync",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "peter-sync.syncPair",
+        "title": "Sync Pair",
+        "category": "peter-sync",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "peter-sync.syncAll",
+        "title": "Sync All",
+        "category": "peter-sync",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "peter-sync.watchPair",
+        "title": "Watch Pair",
+        "category": "peter-sync",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "peter-sync.watchAll",
+        "title": "Watch All",
+        "category": "peter-sync",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "peter-sync.stopWatch",
+        "title": "Stop Watch",
+        "category": "peter-sync",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "peter-sync.openSettingsFile",
+        "title": "Open Settings File",
+        "category": "peter-sync",
+        "icon": "$(json)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "peter-sync",
+          "title": "peter-sync",
+          "icon": "media/sync.svg"
+        }
+      ]
+    },
+    "views": {
+      "peter-sync": [
+        {
+          "id": "peter-sync.pairs",
+          "name": "Folder Pairs",
+          "contextualTitle": "peter-sync"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "peter-sync.pairs",
+        "contents": "No folder pairs yet.\n[Add Pair](command:peter-sync.addPair)\n\nRequires the [peter-sync](https://pypi.org/project/peter-sync/) CLI on your PATH, or set `peter-sync.cliPath`."
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "peter-sync.addPair",
+          "when": "view == peter-sync.pairs",
+          "group": "navigation@1"
+        },
+        {
+          "command": "peter-sync.syncAll",
+          "when": "view == peter-sync.pairs && !peter-sync.watching",
+          "group": "navigation@2"
+        },
+        {
+          "command": "peter-sync.watchAll",
+          "when": "view == peter-sync.pairs && !peter-sync.watching",
+          "group": "navigation@3"
+        },
+        {
+          "command": "peter-sync.stopWatch",
+          "when": "view == peter-sync.pairs && peter-sync.watching",
+          "group": "navigation@3"
+        },
+        {
+          "command": "peter-sync.refresh",
+          "when": "view == peter-sync.pairs",
+          "group": "navigation@4"
+        },
+        {
+          "command": "peter-sync.openSettingsFile",
+          "when": "view == peter-sync.pairs",
+          "group": "overflow"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "peter-sync.syncPair",
+          "when": "view == peter-sync.pairs && viewItem == pair",
+          "group": "inline@1"
+        },
+        {
+          "command": "peter-sync.watchPair",
+          "when": "view == peter-sync.pairs && viewItem == pair",
+          "group": "inline@2"
+        },
+        {
+          "command": "peter-sync.stopWatch",
+          "when": "view == peter-sync.pairs && viewItem == pairWatching",
+          "group": "inline@2"
+        },
+        {
+          "command": "peter-sync.removePair",
+          "when": "view == peter-sync.pairs && viewItem =~ /pair/",
+          "group": "1_actions@9"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "peter-sync.syncPair",
+          "when": "false"
+        },
+        {
+          "command": "peter-sync.watchPair",
+          "when": "false"
+        },
+        {
+          "command": "peter-sync.removePair",
+          "when": "false"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "peter-sync",
+      "properties": {
+        "peter-sync.cliPath": {
+          "type": "string",
+          "default": "peter-sync",
+          "description": "Path to the peter-sync executable. Use an absolute path if the CLI is not on PATH."
+        },
+        "peter-sync.settingsPath": {
+          "type": "string",
+          "default": "",
+          "description": "Optional path to settings.json. Leave empty to use ~/.peter-sync/settings.json."
+        },
+        "peter-sync.watchInterval": {
+          "type": "number",
+          "default": 2,
+          "minimum": 0.2,
+          "description": "Seconds between watch polls when using Watch Pair or Watch All."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.134.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "typescript-eslint": "^8.56.1",
+    "eslint": "^9.39.3",
+    "typescript": "^5.9.3",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2"
+  }
+}
