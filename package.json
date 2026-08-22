@@ -38,6 +38,24 @@
         "icon": "$(trash)"
       },
       {
+        "command": "peter-sync.editExcludes",
+        "title": "Edit Excludes",
+        "category": "peter-sync",
+        "icon": "$(exclude)"
+      },
+      {
+        "command": "peter-sync.addExclude",
+        "title": "Add Exclude",
+        "category": "peter-sync",
+        "icon": "$(add)"
+      },
+      {
+        "command": "peter-sync.removeExclude",
+        "title": "Remove Exclude",
+        "category": "peter-sync",
+        "icon": "$(close)"
+      },
+      {
         "command": "peter-sync.syncPair",
         "title": "Sync Pair",
         "category": "peter-sync",
@@ -148,9 +166,36 @@
           "group": "inline@2"
         },
         {
+          "command": "peter-sync.editExcludes",
+          "when": "view == peter-sync.pairs && viewItem =~ /pair/",
+          "group": "1_actions@1"
+        },
+        {
+          "command": "peter-sync.addExclude",
+          "when": "view == peter-sync.pairs && viewItem =~ /pair/",
+          "group": "1_actions@2"
+        },
+        {
           "command": "peter-sync.removePair",
           "when": "view == peter-sync.pairs && viewItem =~ /pair/",
           "group": "1_actions@9"
+        },
+        {
+          "command": "peter-sync.removeExclude",
+          "when": "view == peter-sync.pairs && viewItem == exclude",
+         ,
+        {
+          "command": "peter-sync.editExcludes",
+          "when": "false"
+        },
+        {
+          "command": "peter-sync.addExclude",
+          "when": "false"
+        },
+        {
+          "command": "peter-sync.removeExclude",
+          "when": "false"
+        } "group": "inline@1"
         }
       ],
       "commandPalette": [

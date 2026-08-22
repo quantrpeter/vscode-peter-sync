@@ -21,7 +21,8 @@ You can also use `python -m peter_sync`.
 ## Features
 
 - Activity bar view of saved folder pairs
-- Add a pair with a name and two folder pickers
+- Add a pair with a name, two folder pickers, and optional excluded folders
+- Edit excluded folders from a pair's context menu (`node_modules` matches anywhere)
 - Sync one pair or all pairs
 - Watch one pair or all pairs (polls at `peter-sync.watchInterval`)
 - Stop watch from the view title or a watching pair
@@ -50,7 +51,7 @@ You can also use `python -m peter_sync`.
 - peter-sync: Refresh
 - peter-sync: Open Settings File
 
-Pair-specific Sync / Watch / Remove actions are on each tree item.
+Pair-specific Sync / Watch / Remove / Edit Excludes actions are on each tree item.
 
 ## Known Issues
 

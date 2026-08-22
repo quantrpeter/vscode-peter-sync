@@ -56,10 +56,15 @@ function parsePair(item: unknown): FolderPair {
 	if (!Array.isArray(snapshot) || !snapshot.every((entry) => typeof entry === 'string')) {
 		throw new Error('Pair snapshot must be a list of file paths.');
 	}
+	const exclude = record.exclude ?? [];
+	if (!Array.isArray(exclude) || !exclude.every((entry) => typeof entry === 'string')) {
+		throw new Error('Pair exclude must be a list of folder paths.');
+	}
 	return {
 		name: record.name,
 		left: record.left,
 		right: record.right,
 		snapshot,
+		exclude,
 	};
 }

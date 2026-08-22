@@ -20,6 +20,9 @@ suite('Extension Test Suite', () => {
 			'peter-sync.refresh',
 			'peter-sync.addPair',
 			'peter-sync.removePair',
+			'peter-sync.editExcludes',
+			'peter-sync.addExclude',
+			'peter-sync.removeExclude',
 			'peter-sync.syncPair',
 			'peter-sync.syncAll',
 			'peter-sync.watchPair',
@@ -38,11 +41,24 @@ suite('Extension Test Suite', () => {
 				left: '/tmp/a',
 				right: '/tmp/b',
 				snapshot: ['readme.md'],
+				exclude: ['node_modules', '.git'],
 			}],
 		}));
 		assert.strictEqual(settings.pairs.length, 1);
 		assert.strictEqual(settings.pairs[0].name, 'notes');
 		assert.deepStrictEqual(settings.pairs[0].snapshot, ['readme.md']);
+		assert.deepStrictEqual(settings.pairs[0].exclude, ['node_modules', '.git']);
+	});
+
+	test('treats missing exclude as empty', () => {
+		const settings = parseSettings(JSON.stringify({
+			pairs: [{
+				name: 'notes',
+				left: '/tmp/a',
+				right: '/tmp/b',
+			}],
+		}));
+		assert.deepStrictEqual(settings.pairs[0].exclude, []);
 	});
 
 	test('treats missing pairs as empty', () => {

@@ -6,5 +6,6 @@ All notable changes to the peter-sync extension will be documented in this file.
 
 - Activity bar view of folder pairs from peter-sync settings
 - Add, remove, sync, and watch commands that call the peter-sync CLI
+- Per-pair excluded folders, editable from the sidebar
 - Settings for CLI path, settings file, and watch interval
 - Status bar item and output channel

@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { runCli, startWatch } from './cli';
 import { loadSettings, resolveSettingsPath } from './settings';
-import { PairItem, PairsTreeProvider } from './pairsView';
+import { ExcludeItem, PairItem, PairsTreeProvider } from './pairsView';
 import { FolderPair } from './types';
 
 let output: vscode.OutputChannel;
@@ -27,6 +27,9 @@ export function activate(context: vscode.ExtensionContext): void {
 		vscode.commands.registerCommand('peter-sync.refresh', () => refreshPairs()),
 		vscode.commands.registerCommand('peter-sync.addPair', () => addPair()),
 		vscode.commands.registerCommand('peter-sync.removePair', (item?: PairItem) => removePair(item)),
+		vscode.commands.registerCommand('peter-sync.editExcludes', (item?: PairItem) => editExcludes(item)),
+		vscode.commands.registerCommand('peter-sync.addExclude', (item?: PairItem) => addExclude(item)),
+		vscode.commands.registerCommand('peter-sync.removeExclude', (item?: ExcludeItem) => removeExclude(item)),
 		vscode.commands.registerCommand('peter-sync.syncPair', (item?: PairItem) => syncPairs(item)),
 		vscode.commands.registerCommand('peter-sync.syncAll', () => syncPairs()),
 		vscode.commands.registerCommand('peter-sync.watchPair', (item?: PairItem) => startWatching(item)),
@@ -103,7 +106,16 @@ async function addPair(): Promise<void> {
 	}
 	const right = await pickFolder('Select right folder');
 	if (!right) {
+		returexcludeText = await vscode.window.showInputBox({
+		prompt: 'Folders to exclude (comma-separated). Leave blank for none.',
+		placeHolder: 'node_modules, .git, dist',
+	});
+	if (excludeText === undefined) {
 		return;
+	}
+
+	const command = ['add', name.trim(), left, right, ...excludeFlags(parseExcludeList(excludeText))];
+	const result = await runManaged(command
 	}
 
 	const result = await runManaged(['add', name.trim(), left, right]);
@@ -125,7 +137,77 @@ async function removePair(item?: PairItem): Promise<void> {
 	);
 	if (choice !== 'Remove') {
 		return;
+	
+
+async function editExcludes(item?: PairItem): Promise<void> {
+	const pair = item?.pair ?? await pickPair('Pair to edit excludes');
+	if (!pair) {
+		return;
 	}
+	const excludeText = await vscode.window.showInputBox({
+		prompt: `Excluded folders for '${pair.name}' (comma-separated). Clear the box to sync everything.`,
+		value: pair.exclude.join(', '),
+		placeHolder: 'node_modules, .git, dist',
+	});
+	if (excludeText === undefined) {
+		return;
+	}
+	const result = await runManaged(['exclude', pair.name, '--set', ...parseExcludeList(excludeText)]);
+	if (result?.code === 0) {
+		void vscode.window.showInformationMessage(`Updated excludes for '${pair.name}'`);
+		refreshPairs();
+	}
+}
+
+async function addExclude(item?: PairItem): Promise<void> {
+	const pair = item?.pair ?? await pickPair('Pair to add an exclude');
+	if (!pair) {
+		return;
+	}
+	const folder = await vscode.window.showInputBox({
+		prompt: `Folder to exclude from '${pair.name}'. Bare names match anywhere.`,
+		placeHolder: 'node_modules',
+		validateInput: (value) => value.trim() ? undefined : 'Folder cannot be empty',
+	});
+	if (!folder) {
+		return;
+	}
+	const result = await runManaged(['exclude', pair.name, '--add', folder.trim()]);
+	if (result?.code === 0) {
+		void vscode.window.showInformationMessage(`Excluded '${folder.trim()}' from '${pair.name}'`);
+		refreshPairs();
+	}
+}
+
+async function removeExclude(item?: ExcludeItem): Promise<void> {
+	if (!item) {
+		const pair = await pickPair('Pair to remove an exclude from');
+		if (!pair) {
+			return;
+		}
+		if (pair.exclude.length === 0) {
+			void vscode.window.showInformationMessage(`Pair '${pair.name}' has no excluded folders.`);
+			return;
+		}
+		const picked = await vscode.window.showQuickPick(pair.exclude, {
+			placeHolder: `Exclude to remove from '${pair.name}'`,
+		});
+		if (!picked) {
+			return;
+		}
+		const result = await runManaged(['exclude', pair.name, '--remove', picked]);
+		if (result?.code === 0) {
+			void vscode.window.showInformationMessage(`Stopped excluding '${picked}' from '${pair.name}'`);
+			refreshPairs();
+		}
+		return;
+	}
+	const result = await runManaged(['exclude', item.pair.name, '--remove', item.folder]);
+	if (result?.code === 0) {
+		void vscode.window.showInformationMessage(`Stopped excluding '${item.folder}' from '${item.pair.name}'`);
+		refreshPairs();
+	}
+}}
 	if (watchTarget === pair.name) {
 		stopWatching();
 	}
@@ -221,7 +303,18 @@ async function openSettingsFile(): Promise<void> {
 
 async function runManaged(command: string[]) {
 	const config = getConfig();
-	output.appendLine(`$ ${config.cliPath} ${command.join(' ')}`);
+	
+
+function parseExcludeList(value: string): string[] {
+	return value
+		.split(',')
+		.map((item) => item.trim())
+		.filter(Boolean);
+}
+
+function excludeFlags(folders: string[]): string[] {
+	return folders.flatMap((folder) => ['--exclude', folder]);
+}output.appendLine(`$ ${config.cliPath} ${command.join(' ')}`);
 	try {
 		const result = await runCli(
 			{

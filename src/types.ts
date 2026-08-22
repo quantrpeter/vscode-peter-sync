@@ -3,6 +3,7 @@ export interface FolderPair {
 	left: string;
 	right: string;
 	snapshot: string[];
+	exclude: string[];
 }
 
 export interface SettingsFile {
