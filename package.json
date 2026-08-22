@@ -2,7 +2,7 @@
   "name": "peter-sync",
   "displayName": "peter-sync",
   "description": "Bidirectional folder sync from VS Code using the peter-sync CLI",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "hongkongprogrammingsociety",
   "engines": {
     "vscode": "^1.134.0"
