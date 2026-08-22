@@ -56,7 +56,7 @@ Pair-specific Sync / Watch / Remove actions are on each tree item.
 
 Watch is a long-running CLI process. Stopping it sends SIGTERM to that process. If the CLI is missing, commands fail with a message to install it or set `peter-sync.cliPath`.
 
-## Development
+## Package
 
 ```bash
 npm install
