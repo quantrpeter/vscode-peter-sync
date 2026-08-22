@@ -183,19 +183,7 @@
         {
           "command": "peter-sync.removeExclude",
           "when": "view == peter-sync.pairs && viewItem == exclude",
-         ,
-        {
-          "command": "peter-sync.editExcludes",
-          "when": "false"
-        },
-        {
-          "command": "peter-sync.addExclude",
-          "when": "false"
-        },
-        {
-          "command": "peter-sync.removeExclude",
-          "when": "false"
-        } "group": "inline@1"
+          "group": "inline@1"
         }
       ],
       "commandPalette": [

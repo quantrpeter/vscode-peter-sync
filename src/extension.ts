@@ -106,7 +106,10 @@ async function addPair(): Promise<void> {
 	}
 	const right = await pickFolder('Select right folder');
 	if (!right) {
-		returexcludeText = await vscode.window.showInputBox({
+		return;
+	}
+
+	const excludeText = await vscode.window.showInputBox({
 		prompt: 'Folders to exclude (comma-separated). Leave blank for none.',
 		placeHolder: 'node_modules, .git, dist',
 	});
@@ -115,10 +118,7 @@ async function addPair(): Promise<void> {
 	}
 
 	const command = ['add', name.trim(), left, right, ...excludeFlags(parseExcludeList(excludeText))];
-	const result = await runManaged(command
-	}
-
-	const result = await runManaged(['add', name.trim(), left, right]);
+	const result = await runManaged(command);
 	if (result?.code === 0) {
 		void vscode.window.showInformationMessage(`Added pair '${name.trim()}'`);
 		refreshPairs();
@@ -137,7 +137,16 @@ async function removePair(item?: PairItem): Promise<void> {
 	);
 	if (choice !== 'Remove') {
 		return;
-	
+	}
+	if (watchTarget === pair.name) {
+		stopWatching();
+	}
+	const result = await runManaged(['remove', pair.name]);
+	if (result?.code === 0) {
+		void vscode.window.showInformationMessage(`Removed pair '${pair.name}'`);
+		refreshPairs();
+	}
+}
 
 async function editExcludes(item?: PairItem): Promise<void> {
 	const pair = item?.pair ?? await pickPair('Pair to edit excludes');
@@ -205,15 +214,6 @@ async function removeExclude(item?: ExcludeItem): Promise<void> {
 	const result = await runManaged(['exclude', item.pair.name, '--remove', item.folder]);
 	if (result?.code === 0) {
 		void vscode.window.showInformationMessage(`Stopped excluding '${item.folder}' from '${item.pair.name}'`);
-		refreshPairs();
-	}
-}}
-	if (watchTarget === pair.name) {
-		stopWatching();
-	}
-	const result = await runManaged(['remove', pair.name]);
-	if (result?.code === 0) {
-		void vscode.window.showInformationMessage(`Removed pair '${pair.name}'`);
 		refreshPairs();
 	}
 }
@@ -303,18 +303,7 @@ async function openSettingsFile(): Promise<void> {
 
 async function runManaged(command: string[]) {
 	const config = getConfig();
-	
-
-function parseExcludeList(value: string): string[] {
-	return value
-		.split(',')
-		.map((item) => item.trim())
-		.filter(Boolean);
-}
-
-function excludeFlags(folders: string[]): string[] {
-	return folders.flatMap((folder) => ['--exclude', folder]);
-}output.appendLine(`$ ${config.cliPath} ${command.join(' ')}`);
+	output.appendLine(`$ ${config.cliPath} ${command.join(' ')}`);
 	try {
 		const result = await runCli(
 			{
@@ -393,4 +382,15 @@ function watchSettingsFile(context: vscode.ExtensionContext): void {
 
 function firstLine(text: string): string {
 	return text.trim().split(/\r?\n/, 1)[0] ?? '';
+}
+
+function parseExcludeList(value: string): string[] {
+	return value
+		.split(',')
+		.map((item) => item.trim())
+		.filter(Boolean);
+}
+
+function excludeFlags(folders: string[]): string[] {
+	return folders.flatMap((folder) => ['--exclude', folder]);
 }
