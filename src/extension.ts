@@ -1,7 +1,7 @@
 import { ChildProcessWithoutNullStreams } from 'child_process';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { runCli, startWatch } from './cli';
+import { runCli, startWatch, SyncProgress } from './cli';
 import { loadSettings, resolveSettingsPath } from './settings';
 import { ExcludeItem, PairItem, PairsTreeProvider } from './pairsView';
 import { FolderPair } from './types';
@@ -219,10 +219,26 @@ async function removeExclude(item?: ExcludeItem): Promise<void> {
 }
 
 async function syncPairs(item?: PairItem): Promise<void> {
-	const command = item?.pair ? ['sync', item.pair.name] : ['sync'];
-	const result = await runManaged(command);
+	const title = item?.pair ? `Syncing ${item.pair.name}` : 'Syncing folder pairs';
+	const command = ['sync', '--progress', ...(item?.pair ? [item.pair.name] : [])];
+	const result = await vscode.window.withProgress(
+		{
+			location: vscode.ProgressLocation.Notification,
+			title,
+			cancellable: false,
+		},
+		async (progress) => runManaged(command, (update) => {
+			const label = update.relative.length <= 48
+				? update.relative
+				: `...${update.relative.slice(-45)}`;
+			progress.report({
+				message: `${update.name} ${update.done}/${update.total} ${label}`,
+				increment: 100 / update.total,
+			});
+		}),
+	);
 	if (result?.code === 0) {
-		const summary = firstLine(result.stdout) || 'Sync finished.';
+		const summary = summaryLine(result.stdout) || 'Sync finished.';
 		void vscode.window.showInformationMessage(summary);
 		refreshPairs();
 	}
@@ -301,7 +317,7 @@ async function openSettingsFile(): Promise<void> {
 	await vscode.window.showTextDocument(document);
 }
 
-async function runManaged(command: string[]) {
+async function runManaged(command: string[], onProgress?: (progress: SyncProgress) => void) {
 	const config = getConfig();
 	output.appendLine(`$ ${config.cliPath} ${command.join(' ')}`);
 	try {
@@ -311,6 +327,7 @@ async function runManaged(command: string[]) {
 				settingsPath: config.configuredSettingsPath || undefined,
 			},
 			command,
+			onProgress,
 		);
 		if (result.stdout.trim()) {
 			output.appendLine(result.stdout.trimEnd());
@@ -382,6 +399,14 @@ function watchSettingsFile(context: vscode.ExtensionContext): void {
 
 function firstLine(text: string): string {
 	return text.trim().split(/\r?\n/, 1)[0] ?? '';
+}
+
+function summaryLine(text: string): string {
+	const lines = text
+		.split(/\r?\n/)
+		.map((line) => line.trim())
+		.filter((line) => line && !line.startsWith('PROGRESS\t'));
+	return lines.find((line) => line.startsWith('Synced ')) ?? lines[0] ?? '';
 }
 
 function parseExcludeList(value: string): string[] {

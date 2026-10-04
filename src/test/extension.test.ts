@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { buildCliArgs, splitCommand } from '../cli';
+import { buildCliArgs, parseProgressLine, splitCommand } from '../cli';
 import { parseSettings, resolveSettingsPath } from '../settings';
 
 suite('Extension Test Suite', () => {
@@ -84,5 +84,16 @@ suite('Extension Test Suite', () => {
 			command: 'python',
 			prefix: ['-m', 'peter_sync'],
 		});
+	});
+
+	test('parses sync progress lines', () => {
+		assert.deepStrictEqual(parseProgressLine('PROGRESS\tnotes\t2\t10\tsrc/a.txt'), {
+			name: 'notes',
+			done: 2,
+			total: 10,
+			relative: 'src/a.txt',
+		});
+		assert.strictEqual(parseProgressLine('Synced notes'), undefined);
+		assert.strictEqual(parseProgressLine('PROGRESS\tnotes\tnope\t10\ta.txt'), undefined);
 	});
 });

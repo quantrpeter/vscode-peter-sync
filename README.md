@@ -23,7 +23,7 @@ You can also use `python -m peter_sync`.
 - Activity bar view of saved folder pairs
 - Add a pair with a name, two folder pickers, and optional excluded folders
 - Edit excluded folders from a pair's context menu (`node_modules` matches anywhere)
-- Sync one pair or all pairs
+- Sync one pair or all pairs, with a notification progress bar
 - Watch one pair or all pairs (polls at `peter-sync.watchInterval`)
 - Stop watch from the view title or a watching pair
 - Open the settings JSON file
