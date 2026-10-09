@@ -54,7 +54,9 @@ export class PairsTreeProvider implements vscode.TreeDataProvider<PairTreeItem> 
 	private watchingName: string | undefined;
 
 	refresh(pairs: FolderPair[], watchingName?: string): void {
-		this.pairs = pairs;
+		this.pairs = [...pairs].sort((left, right) =>
+			left.name.localeCompare(right.name, undefined, { sensitivity: 'base', numeric: true }),
+		);
 		this.watchingName = watchingName;
 		this._onDidChangeTreeData.fire();
 	}

@@ -4,8 +4,36 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { buildCliArgs, parseProgressLine, splitCommand } from '../cli';
 import { parseSettings, resolveSettingsPath } from '../settings';
+import { PairItem, PairsTreeProvider } from '../pairsView';
+import { FolderPair } from '../types';
 
 suite('Extension Test Suite', () => {
+	test('sorts folder pairs by name without changing settings order', () => {
+		const pairs: FolderPair[] = ['wps', 'riscv-10', 'assembler', 'JMake', 'riscv-2'].map((name) => ({
+			name,
+			left: `/tmp/${name}/left`,
+			right: `/tmp/${name}/right`,
+			snapshot: [],
+			exclude: ['dist', '.git'],
+		}));
+		const originalOrder = pairs.map((pair) => pair.name);
+		const provider = new PairsTreeProvider();
+		provider.refresh(pairs, 'JMake');
+
+		const children = provider.getChildren();
+		assert.deepStrictEqual(children.map((item) => item.pair.name), [
+			'assembler', 'JMake', 'riscv-2', 'riscv-10', 'wps',
+		]);
+		assert.deepStrictEqual(pairs.map((pair) => pair.name), originalOrder);
+		const watching = children[1];
+		assert.ok(watching instanceof PairItem);
+		assert.strictEqual(watching.contextValue, 'pairWatching');
+		assert.deepStrictEqual(provider.getChildren(watching).map((item) => item.label), ['dist', '.git']);
+
+		provider.refresh([]);
+		assert.deepStrictEqual(provider.getChildren(), []);
+	});
+
 	test('activates and registers peter-sync commands', async () => {
 		const extension = vscode.extensions.getExtension('peter.peter-sync');
 		assert.ok(extension, 'extension peter.peter-sync should be present');

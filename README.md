@@ -20,7 +20,7 @@ You can also use `python -m peter_sync`.
 
 ## Features
 
-- Activity bar view of saved folder pairs
+- Activity bar view of saved folder pairs, sorted alphabetically by name (case-insensitive, with natural number ordering). Saved settings order is unchanged.
 - Add a pair with a name, two folder pickers, and optional excluded folders
 - Edit excluded folders from a pair's context menu (`node_modules` matches anywhere)
 - Sync one pair or all pairs, with a notification progress bar

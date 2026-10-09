@@ -2,6 +2,10 @@
 
 All notable changes to the peter-sync extension will be documented in this file.
 
+## [Unreleased]
+
+- Sort folder pairs alphabetically by name in the sidebar without reordering saved settings.
+
 ## [0.0.1]
 
 - Activity bar view of folder pairs from peter-sync settings
