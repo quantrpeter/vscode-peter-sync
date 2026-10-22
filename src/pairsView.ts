@@ -18,11 +18,14 @@ export class PairItem extends vscode.TreeItem {
 			? `\nexcludes: ${pair.exclude.join(', ')}`
 			: '';
 		this.tooltip = `${pair.left}\n${pair.right}${excludeLabel}`;
+		// this.description = watching
+		// 	? 'watching'
+		// 	: pair.exclude.length
+		// 		? `${pair.left} ↔ ${pair.right}  (−${pair.exclude.length})`
+		// 		: `${pair.left} ↔ ${pair.right}`;
 		this.description = watching
 			? 'watching'
-			: pair.exclude.length
-				? `${pair.left} ↔ ${pair.right}  (−${pair.exclude.length})`
-				: `${pair.left} ↔ ${pair.right}`;
+			: `${pair.left} ↔ ${pair.right}`;
 		this.contextValue = watching ? 'pairWatching' : 'pair';
 		this.iconPath = new vscode.ThemeIcon(watching ? 'eye' : 'folder');
 		this.command = {
